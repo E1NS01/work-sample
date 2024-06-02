@@ -1,0 +1,14 @@
+services:
+  mongodb:
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=sample
+      - MONGO_INITDB_ROOT_PASSWORD=sample
+    ports:
+      - '27017:27017'
+    volumes:
+      - db:/data/db
+
+volumes:
+  db:
