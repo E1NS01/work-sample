@@ -1,7 +1,7 @@
 import { describe, expect, test, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import { app } from '../src';
-import { connect, disconnect } from '../src/database';
+import { connect, disconnect } from '../src/config/database';
 
 describe('API test', () => {
     beforeAll(() => {

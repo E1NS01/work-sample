@@ -1,8 +1,14 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
-import { connect } from './database';
-import UserModel from './user';
+import { connect } from './config/database';
+import UserModel from './model/user';
+import errorHandler from './middleware/errorHandler';
+
+interface User {
+    email: string;
+    createdAt?: Date;
+}
 
 dotenv.config();
 
@@ -11,7 +17,7 @@ connect();
 export const app: Express = express();
 app.use(cors()).use(express.json()).options('*', cors());
 
-app.post('/users', async (req: Request, res: Response) => {
+app.post('/users', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const body = req.body;
         if (!body.email) {
@@ -21,24 +27,36 @@ app.post('/users', async (req: Request, res: Response) => {
         if (!emailRegex.test(body.email)) {
             throw new Error('Email is not valid');
         }
-        const user = new UserModel(req.body);
-        try {
-            await user.save();
-            res.status(201).send(user);
-        } catch (error) {
-            res.status(500).send({ error: error.message });
-        }
     } catch (error) {
-        res.status(400).send({ error: error.message });
+        console.log(error.message);
+        next(error);
+        return;
+    }
+
+    const user = new UserModel(req.body);
+
+    try {
+        await user.save();
+        res.status(201).send(user);
+    } catch (error) {
+        console.log(error.message);
+        next(error);
     }
 });
-app.get('/users', (req: Request, res: Response) => {
-    console.log(req.query);
-    //getting all users from mock db
-    //sorting users by createdAt
-    //return users
-    res.status(200).send([]);
+app.get('/users', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        let users: User[] = [];
+        if (req.query.created === 'ascending') {
+            users = await UserModel.find().sort({ createdAt: 1 });
+        } else users = await UserModel.find().sort({ createdAt: -1 });
+        res.status(200).send(users);
+    } catch (error) {
+        console.log(error.message);
+        next(error);
+    }
 });
+
+app.use(errorHandler);
 
 const port = process.env.PORT || 3111;
 app.listen(port, () => {
