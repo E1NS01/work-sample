@@ -94,7 +94,7 @@ describe('API test', () => {
             const res = await request(app)
                 .post('/users')
                 .set('Accept', 'application/json')
-                .send({});
+                .send({ name: 'Test Name' });
             expect(res.status).toBe(400);
             expect(res.headers['content-type']).toEqual(
                 expect.stringContaining('application/json'),
