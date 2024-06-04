@@ -1,11 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
-import { CustomError } from '../definitions/CustomError';
+import { ValidationErrorImpl } from '../definitions/ValidationError';
 
-function errorHandler(err: CustomError, req: Request, res: Response, next: NextFunction) {
-    const errorStatus = err.status || 500;
-    const errorMessage = err.message || 'Something went wrong';
+function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
+    let errorStatus = 500;
+    let errorMessage = 'Something went wrong';
+
+    if (err instanceof ValidationErrorImpl) {
+        errorStatus = err.status;
+        errorMessage = err.message;
+    }
+
     res.status(errorStatus).send({
-        sucess: false,
+        success: false,
         status: errorStatus,
         message: errorMessage,
         stack: process.env.NODE_ENV === 'development' ? err.stack : '',

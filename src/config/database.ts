@@ -9,17 +9,13 @@ async function connect() {
         if (process.env.NODE_ENV === 'test') {
             mongoTest = await MongoMemoryServer.create();
             dbUri = await mongoTest.getUri();
-        } else {
-            mongoose.connect(dbUri);
         }
+        await mongoose.connect(dbUri);
     } catch (error) {
         console.error('Error connecting to the database: ', error);
         process.exit(1);
     }
     const dbConnection = mongoose.connection;
-    dbConnection.once('open', () => {
-        console.log('Database connected');
-    });
     dbConnection.on('error', (error) => {
         console.error('Database connection error: ', error);
     });

@@ -6,7 +6,7 @@
     "scripts": {
         "start": "docker-compose up -d && NODE_ENV=production ts-node src/index.ts",
         "dev": "docker-compose up -d && NODE_ENV=development nodemon src/index.ts",
-        "test": "set DEBUG=* && NODE_ENV=test jest --testPathPattern=test --coverage"
+        "test": "set DEBUG=* && NODE_ENV=test jest --testPathPattern=test --coverage --detectOpenHandles"
     },
     "author": "Christoph Fey",
     "license": "ISC",
