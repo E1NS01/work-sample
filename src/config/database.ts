@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import logger from './logger';
 
 let mongoTest: MongoMemoryServer = null;
 
@@ -12,7 +13,7 @@ async function connect() {
         }
         await mongoose.connect(dbUri);
     } catch (error) {
-        console.error('Error connecting to the database: ', error);
+        logger.error('Error connecting to the database: ', error);
         process.exit(1);
     }
     const dbConnection = mongoose.connection;
@@ -28,7 +29,7 @@ async function disconnect() {
             await mongoTest.stop();
         }
     } catch (error) {
-        console.error('Error disconnecting from the database: ', error);
+        logger.error('Error disconnecting from the database: ', error);
         process.exit(1);
     }
 }

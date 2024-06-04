@@ -6,6 +6,7 @@ import UserModel from './model/user';
 import errorHandler from './middleware/errorHandler';
 import { User } from './definitions/user';
 import validateUser from './middleware/validateUser';
+import logger from './config/logger';
 
 dotenv.config();
 
@@ -20,7 +21,7 @@ app.post('/users', validateUser, async (req: Request, res: Response, next: NextF
         await user.save();
         res.status(201).send(user);
     } catch (error) {
-        console.log(error.message);
+        logger.error(error.message);
         next(error);
     }
 });
@@ -33,7 +34,7 @@ app.get('/users', async (req: Request, res: Response, next: NextFunction) => {
         } else users = await UserModel.find().sort({ createdAt: -1 });
         res.status(200).send(users);
     } catch (error) {
-        console.log(error.message);
+        logger.error(error.message);
         error.status = 500;
         next(error);
     }
