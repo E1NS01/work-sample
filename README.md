@@ -18,23 +18,23 @@ These instructions will get you a copy of this project up and running on yout lo
 
 -   Node.js
 -   MongoDB
--   Docker (optional)
+-   Docker
 
 ### Installation
 
 1. Clone the repository
 2. Install dependencies with `npm install` or `yarn install`
-3. Copy `.env.example` to `.env` and fill in your MongoDB connection details
+3. Copy `.env.example` to `.env` and fill in your MongoDB connection details and desired port
 
 ### Running the Application
 
--   To start the server, run `npm start`
+-   To start the server, run `npm start` or `yarn start`
 
--   To start the delopment server, run `npm dev`
+-   To start the delopment server, run `npm dev`or `yarn dev`
 
 ### Running the Tests
 
--   To execute tests, run `npm test`
+-   To execute tests, run `npm test` or `yarn test`
 
 ## Endpoints
 
@@ -45,6 +45,30 @@ These instructions will get you a copy of this project up and running on yout lo
 
 -   GET /test: returns a `test` message.
 -   Get /test-error: Throws an error for testing error handling.
+
+## Example Usage
+
+### Creating a user
+
+To create a user, make a POST request to the `/users` endpoint with a JSON body containing the user's name and email address:
+
+```sh
+curl -X POST -H "Content-Type: application/json" -d '{"name":"John Doe", "email":"john@example.com}' http://localhost:3111/users
+```
+
+### Retrieve Users
+
+To retrieve all users make a GET request to the `/users` endpoint:
+
+```sh
+curl -X GET http://localhost:3111/users
+```
+
+You can also sort users by breation date by adding a `created` query parameter (accepts `ascending` and `descending`). For example:
+
+```sh
+curl -X GET http://localhost:3111/users?created=decscending
+```
 
 ## Goal
 

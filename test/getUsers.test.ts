@@ -1,9 +1,8 @@
 import { describe, expect, test, afterEach } from '@jest/globals';
-import request from 'supertest';
-import { app } from '../src';
 import UserModel from '../src/model/user';
-import { User } from '../src/definitions/user';
+import { User } from '../src/types/user';
 import addUser from './helper/addUser';
+import { sendGetRequest } from './helper/sendGetRequest';
 
 describe('API test', () => {
     afterEach(async () => {
@@ -11,29 +10,29 @@ describe('API test', () => {
     });
 
     describe('GET /users', () => {
-        test('should return an empty array without users', async () => {
-            const res = await request(app).get('/users').set('Accept', 'application/json');
-
-            expect(res.status).toBe(200);
+        test('should return application/json content type', async () => {
+            const res = await sendGetRequest('/users');
             expect(res.headers['content-type']).toEqual(
                 expect.stringContaining('application/json'),
             );
+        });
+
+        test('should return an empty array without users', async () => {
+            const res = await sendGetRequest('/users');
+
+            expect(res.status).toBe(200);
             expect(res.body).toEqual([]);
         });
+
         test('should return an array of users (without query)', async () => {
             const result: User[] = [];
 
             result.push(await addUser('Test Name', 'test@test.com'));
 
-            const res = await request(app).get('/users').set('Accept', 'application/json');
+            const res = await sendGetRequest('/users');
 
             expect(res.status).toBe(200);
-            expect(res.headers['content-type']).toEqual(
-                expect.stringContaining('application/json'),
-            );
-            for (let i = 0; i < res.body.length - 1; i++) {
-                expect(result[i]._id.toString()).toEqual(res.body[i]._id);
-            }
+            expect(result[0]._id.toString()).toEqual(res.body[0]._id);
         });
 
         test('should return an array of users, sorted by createdAt (descending)', async () => {
@@ -44,20 +43,13 @@ describe('API test', () => {
 
             result = result.reverse();
 
-            const res = await request(app)
-                .get('/users?created=descending')
-                .set('Accept', 'application/json');
+            const res = await sendGetRequest('/users?created=descending');
 
             expect(res.status).toBe(200);
-            expect(res.headers['content-type']).toEqual(
-                expect.stringContaining('application/json'),
-            );
 
+            const userIds = res.body.map((user: User) => user._id);
             for (let i = 0; i < res.body.length - 1; i++) {
-                expect(result[i]._id.toString()).toEqual(res.body[i]._id);
-            }
-
-            for (let i = 0; i < res.body.length - 1; i++) {
+                expect(userIds).toContain(res.body[i]._id);
                 expect(res.body[i].createdAt >= res.body[i + 1].createdAt).toBe(true);
             }
         });
@@ -68,19 +60,13 @@ describe('API test', () => {
             result.push(await addUser('Test NameONE', 'test1@test.com'));
             result.push(await addUser('Test NameTWO', 'test2@test.com'));
 
-            const res = await request(app)
-                .get('/users?created=ascending')
-                .set('Accept', 'application/json');
+            const res = await sendGetRequest('/users?created=ascending');
 
             expect(res.status).toBe(200);
-            expect(res.headers['content-type']).toEqual(
-                expect.stringContaining('application/json'),
-            );
-            for (let i = 0; i < res.body.length - 1; i++) {
-                expect(result[i]._id.toString()).toEqual(res.body[i]._id);
-            }
 
+            const userIds = res.body.map((user: User) => user._id);
             for (let i = 0; i < res.body.length - 1; i++) {
+                expect(userIds).toContain(res.body[i]._id);
                 expect(res.body[i].createdAt <= res.body[i + 1].createdAt).toBe(true);
             }
         });

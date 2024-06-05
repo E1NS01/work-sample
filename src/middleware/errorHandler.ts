@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { ValidationErrorImpl } from '../definitions/ValidationError';
+import { ValidationError } from '../errors/ValidationError';
+import { DuplicateEntryError } from '../errors/DuplicateEntryError';
 
 function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
     let errorStatus = 500;
     let errorMessage = 'Something went wrong';
 
-    if (err instanceof ValidationErrorImpl) {
+    if (err instanceof ValidationError || err instanceof DuplicateEntryError) {
         errorStatus = err.status;
         errorMessage = err.message;
     }

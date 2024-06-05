@@ -1,4 +1,4 @@
-import { User } from '../../src/definitions/user';
+import { User } from '../../src/types/user';
 import UserModel from '../../src/model/user';
 
 async function addUser(name: string, email: string): Promise<User> {

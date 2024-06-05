@@ -1,7 +1,6 @@
 import { describe, expect, test, afterEach } from '@jest/globals';
-import request from 'supertest';
-import { app } from '../src';
 import UserModel from '../src/model/user';
+import { sendPostRequest } from './helper/sendPostRequest';
 
 describe('API test', () => {
     afterEach(async () => {
@@ -9,15 +8,18 @@ describe('API test', () => {
     });
 
     describe('POST /users', () => {
-        test('should require an email', async () => {
-            const res = await request(app)
-                .post('/users')
-                .set('Accept', 'application/json')
-                .send({ name: 'Test Name' });
-            expect(res.status).toBe(400);
+        test('should return application/json content type', async () => {
+            const res = await sendPostRequest('/users', {});
             expect(res.headers['content-type']).toEqual(
                 expect.stringContaining('application/json'),
             );
+        });
+
+        test('should require an email', async () => {
+            const res = await sendPostRequest('/users', {
+                name: 'Test Name',
+            });
+            expect(res.status).toBe(400);
             expect(res.body).toEqual({
                 message: 'Email is required',
                 stack: '',
@@ -25,15 +27,12 @@ describe('API test', () => {
                 success: false,
             });
         });
+
         test('should require a name', async () => {
-            const res = await request(app)
-                .post('/users')
-                .set('Accept', 'application/json')
-                .send({ email: 'test@test.com' });
+            const res = await sendPostRequest('/users', {
+                email: 'email@email.com',
+            });
             expect(res.status).toBe(400);
-            expect(res.headers['content-type']).toEqual(
-                expect.stringContaining('application/json'),
-            );
             expect(res.body).toEqual({
                 message: 'Name is required',
                 stack: '',
@@ -41,15 +40,13 @@ describe('API test', () => {
                 success: false,
             });
         });
+
         test('should require a valid email', async () => {
-            const res = await request(app)
-                .post('/users')
-                .set('Accept', 'application/json')
-                .send({ email: 'email', name: 'Test Name' });
+            const res = await sendPostRequest('/users', {
+                name: 'Test Name',
+                email: 'email',
+            });
             expect(res.status).toBe(422);
-            expect(res.headers['content-type']).toEqual(
-                expect.stringContaining('application/json'),
-            );
             expect(res.body).toEqual({
                 message: 'Email is not valid',
                 stack: '',
@@ -57,15 +54,13 @@ describe('API test', () => {
                 success: false,
             });
         });
+
         test('should require a valid name', async () => {
-            const res = await request(app)
-                .post('/users')
-                .set('Accept', 'application/json')
-                .send({ email: 'email@email.com', name: '1234' });
+            const res = await sendPostRequest('/users', {
+                name: '1234',
+                email: 'email@email.com',
+            });
             expect(res.status).toBe(422);
-            expect(res.headers['content-type']).toEqual(
-                expect.stringContaining('application/json'),
-            );
             expect(res.body).toEqual({
                 message: 'Name is not valid',
                 stack: '',
@@ -73,20 +68,36 @@ describe('API test', () => {
                 success: false,
             });
         });
+
         test('should create a user and return status code 201', async () => {
-            const res = await request(app)
-                .post('/users')
-                .set('Accept', 'application/json')
-                .send({ name: 'Test Name', email: 'email@email.com' });
+            const res = await sendPostRequest('/users', {
+                name: 'Test Name',
+                email: 'email@email.com',
+            });
             expect(res.status).toBe(201);
-            expect(res.headers['content-type']).toEqual(
-                expect.stringContaining('application/json'),
-            );
             expect(res.body).toEqual({
                 _id: expect.any(String),
                 name: 'Test Name',
                 email: 'email@email.com',
                 createdAt: expect.any(String),
+            });
+        });
+
+        test('should not create a user if email already exists', async () => {
+            await sendPostRequest('/users', {
+                name: 'Test Name',
+                email: 'test@test.com',
+            });
+            const res = await sendPostRequest('/users', {
+                name: 'Test Name',
+                email: 'test@test.com',
+            });
+            expect(res.status).toBe(409);
+            expect(res.body).toEqual({
+                message: 'User already exists',
+                stack: '',
+                status: 409,
+                success: false,
             });
         });
     });
