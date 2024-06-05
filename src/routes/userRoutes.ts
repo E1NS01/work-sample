@@ -3,8 +3,9 @@ import { body, query } from 'express-validator';
 import validateUser from '../middleware/validateUser';
 import { createUser, getUsers } from '../controller/userController';
 
-const router = express.Router();
-router.post(
+const userRouter = express.Router();
+
+userRouter.post(
     '/users',
     [
         body('name').isString().trim().escape(),
@@ -13,10 +14,11 @@ router.post(
     ],
     createUser,
 );
-router.get(
+
+userRouter.get(
     '/users',
     [query('created').optional().isIn(['ascending', 'descending']).trim().escape()],
     getUsers,
 );
 
-export default router;
+export default userRouter;
